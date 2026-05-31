@@ -1,22 +1,119 @@
-<<<<<<< HEAD
-# workout_log
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
 # WorkoutLog
-Дневник силовых тренировок. Пользователь создает упражнение (жим лежа, 80 кг, 3 подхода по 8 раз). Приложение запоминает рабочие веса. На следующей тренировке показывает: «В прошлый раз ты сделал 80х8, попробуй 82.5х8». График прогресса по каждому упражнению.
->>>>>>> 65765391a9fc43cf8ef369360b5b01984cdfa181
+
+**WorkoutLog** — мобильное приложение для отслеживания тренировок, упражнений, подходов и прогресса.
+Проект разработан на **Flutter** с использованием **Firebase Authentication**.
+
+## Описание проекта
+
+WorkoutLog помогает пользователю вести тренировочный процесс: выбирать упражнение, отслеживать выполнение подходов, использовать таймер отдыха и смотреть историю прогресса.
+
+Приложение выполнено в тёмном минималистичном стиле по макету из Figma.
+
+## Основные функции
+
+* Регистрация и вход в аккаунт через Firebase Authentication
+* Главный экран тренировки
+* Отображение текущего упражнения
+* Отслеживание статуса подходов:
+
+  * зелёный — подход завершён
+  * жёлтый — подход выполняется
+  * серый — подход ещё не начат
+* Таймер отдыха на 90 секунд
+* Добавление нового упражнения
+* Выбор упражнения из списка
+* История тренировок
+* Экран профиля пользователя
+* Выход из аккаунта
+
+## Технологии
+
+* Flutter
+* Dart
+* Firebase Authentication
+* Cloud Firestore
+* Figma
+* Android Studio
+
+## Структура проекта
+
+```text
+lib/
+├── app_state.dart
+├── app_theme.dart
+├── firebase_options.dart
+├── main.dart
+├── login_screen.dart
+├── register_screen.dart
+├── main_screen.dart
+├── home_screen.dart
+├── rest_screen.dart
+├── history_screen.dart
+├── add_exercise_screen.dart
+├── library_screen.dart
+└── profile_screen.dart
+```
+
+## Установка и запуск
+
+1. Клонировать репозиторий:
+
+```bash
+git clone https://github.com/USERNAME/workout_log.git
+```
+
+2. Перейти в папку проекта:
+
+```bash
+cd workout_log
+```
+
+3. Установить зависимости:
+
+```bash
+flutter pub get
+```
+
+4. Запустить приложение:
+
+```bash
+flutter run
+```
+
+## Firebase
+
+В проекте используется Firebase Authentication для регистрации и входа пользователей.
+
+Для корректной работы Firebase нужно добавить файл:
+
+```text
+android/app/google-services.json
+```
+
+Также проект использует файл:
+
+```text
+lib/firebase_options.dart
+```
+
+Он создаётся через FlutterFire CLI.
+
+## Дизайн
+
+Дизайн приложения был подготовлен в Figma.
+Основной стиль:
+
+* тёмный градиентный фон
+* чёрные карточки
+* ярко-зелёный акцент
+* минималистичная нижняя навигация
+* крупная типографика
+
+## Статус проекта
+
+Проект находится в стадии MVP.
+Реализована базовая логика приложения и авторизация. Следующий этап — сохранение упражнений и истории тренировок в Cloud Firestore.
+
+## Автор
+
+Проект разработан в рамках учебной работы.
