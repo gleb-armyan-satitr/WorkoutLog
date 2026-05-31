@@ -333,19 +333,6 @@ lib/firebase_options.dart
 
 ---
 
-## Важно про `google-services.json`
-
-Файл `android/app/google-services.json` содержит настройки Firebase-проекта.
-
-Если репозиторий публичный, лучше не загружать этот файл в GitHub.
-Можно добавить его в `.gitignore`:
-
-```gitignore
-android/app/google-services.json
-```
-
----
-
 ## Статус проекта
 
 Проект находится в стадии MVP, но уже содержит основной функционал дневника силовых тренировок:
