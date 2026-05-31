@@ -24,37 +24,37 @@ class ProfileScreen extends StatelessWidget {
       decoration: AppGradients.background,
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(22, 28, 22, 32),
+          padding: const EdgeInsets.fromLTRB(22, 30, 22, 34),
           children: [
             const Text(
               'Профиль',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 25,
+                fontSize: 29,
                 fontWeight: FontWeight.w900,
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
 
-            CircleAvatar(
-              radius: 42,
+            const CircleAvatar(
+              radius: 48,
               backgroundColor: AppColors.accent,
-              child: const Icon(
+              child: Icon(
                 Icons.person,
                 color: AppColors.card,
-                size: 58,
+                size: 66,
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
 
             Center(
               child: Text(
                 name,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 17,
+                  fontSize: 20,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -63,13 +63,13 @@ class ProfileScreen extends StatelessWidget {
               child: Text(
                 'Активен 45 дней',
                 style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
+                  color: Colors.white,
+                  fontSize: 15,
                 ),
               ),
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
 
             _InfoTile(
               icon: Icons.person_outline,
@@ -93,38 +93,38 @@ class ProfileScreen extends StatelessWidget {
             ),
 
             Container(
-              margin: const EdgeInsets.only(top: 4, bottom: 12),
-              padding: const EdgeInsets.all(15),
+              margin: const EdgeInsets.only(top: 8, bottom: 24),
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
               decoration: BoxDecoration(
                 color: AppColors.card,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.track_changes, color: AppColors.accent),
-                      SizedBox(width: 10),
+                      Icon(Icons.track_changes, color: AppColors.accent, size: 28),
+                      SizedBox(width: 12),
                       Text(
                         'Цели тренировок',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 15,
+                          fontSize: 18,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  const Text(
+                  SizedBox(height: 4),
+                  Text(
                     'Набор мышечной массы',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: const [
+                    children: [
                       _GoalValue(value: '156', label: 'Тренировок'),
                       _GoalValue(value: '78', label: 'кг вес'),
                       _GoalValue(value: '12%', label: 'жир'),
@@ -136,28 +136,33 @@ class ProfileScreen extends StatelessWidget {
 
             Center(
               child: SizedBox(
-                width: 150,
-                height: 56,
+                width: 178,
+                height: 64,
                 child: OutlinedButton.icon(
                   onPressed: logout,
                   icon: const Icon(
                     Icons.logout,
                     color: AppColors.danger,
-                    size: 18,
+                    size: 22,
                   ),
                   label: const Text(
-                    'Выйти из аккаунта',
+                    'Выйти из\nаккаунта',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.danger,
-                      fontSize: 12,
+                      fontSize: 14,
+                      height: 1.15,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.danger, width: 2),
+                    backgroundColor: AppColors.darkButton,
+                    side: const BorderSide(
+                      color: AppColors.danger,
+                      width: 2,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11),
+                      borderRadius: BorderRadius.circular(13),
                     ),
                   ),
                 ),
@@ -184,37 +189,41 @@ class _InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 58,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      height: 69,
+      margin: const EdgeInsets.only(bottom: 13),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.accent, size: 22),
-          const SizedBox(width: 14),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
+          Icon(icon, color: AppColors.accent, size: 27),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -239,13 +248,17 @@ class _GoalValue extends StatelessWidget {
           value,
           style: const TextStyle(
             color: AppColors.accent,
-            fontSize: 18,
+            fontSize: 24,
             fontWeight: FontWeight.w900,
           ),
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white, fontSize: 11),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

@@ -57,13 +57,13 @@ class _RestScreenState extends State<RestScreen> {
       decoration: AppGradients.background,
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(22, 24, 22, 32),
+          padding: const EdgeInsets.fromLTRB(22, 25, 22, 34),
           children: [
             Text(
               exercise.name,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 27,
+                fontSize: 31,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -72,15 +72,15 @@ class _RestScreenState extends State<RestScreen> {
               widget.appState.setProgressText,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 15),
 
             Container(
-              height: 143,
+              height: 157,
               decoration: BoxDecoration(
                 color: AppColors.card.withOpacity(0.96),
                 borderRadius: BorderRadius.circular(32),
@@ -97,17 +97,18 @@ class _RestScreenState extends State<RestScreen> {
                       timerText,
                       style: const TextStyle(
                         color: AppColors.accent,
-                        fontSize: 49,
+                        fontSize: 55,
                         fontWeight: FontWeight.w900,
+                        height: 1,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     const Text(
                       'Отдых',
                       style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -115,7 +116,7 @@ class _RestScreenState extends State<RestScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 25),
 
             for (int i = 0; i < exercise.sets; i++)
               _RestSetCard(
@@ -124,10 +125,12 @@ class _RestScreenState extends State<RestScreen> {
                 status: widget.appState.statusForSet(i),
               ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: 22),
 
-            OutlineGreenButton(
+            DarkActionButton(
               text: 'Закончить отдых',
+              height: 60,
+              fontSize: 17,
               onPressed: widget.onFinishRest,
             ),
           ],
@@ -157,21 +160,25 @@ class _RestSetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 61,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      height: 69,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 17),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 15,
-            backgroundColor: color.withOpacity(status == 0 ? 0.65 : 1),
-            child: const Icon(Icons.check, color: Colors.black, size: 18),
+            radius: 18,
+            backgroundColor: color.withOpacity(status == 0 ? 0.75 : 1),
+            child: const Icon(
+              Icons.check,
+              color: Colors.black,
+              size: 20,
+            ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 17),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,15 +187,17 @@ class _RestSetCard extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
                 details,
                 style: const TextStyle(
-                  color: Color(0xFF9C9C9C),
-                  fontSize: 12,
+                  color: Color(0xFFB8B8B8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

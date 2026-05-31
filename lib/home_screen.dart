@@ -20,6 +20,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final exercise = appState.selectedExercise;
+    final lastLog = _lastLogForCurrentExercise();
+
+    final double recommendedWeight = lastLog == null
+        ? exercise.weight.toDouble()
+        : lastLog.exercise.weight + 2.5;
 
     return DecoratedBox(
       decoration: AppGradients.background,
@@ -27,13 +32,13 @@ class HomeScreen extends StatelessWidget {
         child: Stack(
           children: [
             ListView(
-              padding: const EdgeInsets.fromLTRB(22, 24, 22, 96),
+              padding: const EdgeInsets.fromLTRB(22, 25, 22, 98),
               children: [
                 Text(
                   exercise.name,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 27,
+                    fontSize: 31,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -42,15 +47,15 @@ class HomeScreen extends StatelessWidget {
                   appState.setProgressText,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 15),
 
                 Container(
-                  height: 143,
+                  height: 157,
                   decoration: BoxDecoration(
                     color: AppColors.card.withOpacity(0.96),
                     borderRadius: BorderRadius.circular(32),
@@ -67,15 +72,25 @@ class HomeScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: AppColors.accent,
-                        fontSize: 29,
-                        height: 1.35,
+                        fontSize: 34,
+                        height: 1.25,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 13),
+
+                _RecommendationCard(
+                  lastText: lastLog == null
+                      ? 'Пока нет прошлой тренировки'
+                      : '${lastLog.exercise.weight}кг × ${lastLog.exercise.reps}',
+                  recommendationText:
+                      'Попробуй ${_formatWeight(recommendedWeight)}кг × ${exercise.reps}',
+                ),
+
+                const SizedBox(height: 17),
 
                 for (int i = 0; i < exercise.sets; i++)
                   _SetCard(
@@ -84,20 +99,24 @@ class HomeScreen extends StatelessWidget {
                     status: appState.statusForSet(i),
                   ),
 
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
 
                 Row(
                   children: [
                     Expanded(
-                      child: OutlineGreenButton(
+                      child: DarkActionButton(
                         text: 'Отдых',
+                        height: 60,
+                        fontSize: 17,
                         onPressed: onStartRest,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 13),
                     Expanded(
-                      child: OutlineGreenButton(
+                      child: DarkActionButton(
                         text: 'Завершить\nподход',
+                        height: 60,
+                        fontSize: 17,
                         onPressed: () {
                           final finished = appState.completeCurrentSet();
                           onChanged();
@@ -118,13 +137,15 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 13),
 
                 Center(
                   child: SizedBox(
-                    width: 160,
-                    child: OutlineGreenButton(
+                    width: 178,
+                    child: DarkActionButton(
                       text: 'Выбрать\nупражнение',
+                      height: 60,
+                      fontSize: 17,
                       onPressed: () async {
                         final result = await Navigator.push<Exercise>(
                           context,
@@ -147,29 +168,118 @@ class HomeScreen extends StatelessWidget {
             ),
 
             Positioned(
-              right: 19,
-              bottom: 20,
-              child: FloatingActionButton(
-                backgroundColor: AppColors.accent,
-                elevation: 0,
-                onPressed: () async {
-                  final result = await Navigator.push<Exercise>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AddExerciseScreen(),
-                    ),
-                  );
+              right: 22,
+              bottom: 22,
+              child: SizedBox(
+                width: 66,
+                height: 66,
+                child: FloatingActionButton(
+                  backgroundColor: AppColors.accent,
+                  elevation: 0,
+                  onPressed: () async {
+                    final result = await Navigator.push<Exercise>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AddExerciseScreen(),
+                      ),
+                    );
 
-                  if (result != null) {
-                    appState.addExercise(result);
-                    onChanged();
-                  }
-                },
-                child: const Icon(Icons.add, color: Colors.black, size: 34),
+                    if (result != null) {
+                      appState.addExercise(result);
+                      onChanged();
+                    }
+                  },
+                  child: const Icon(Icons.add, color: Colors.black, size: 38),
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  WorkoutLog? _lastLogForCurrentExercise() {
+    for (final log in appState.logs) {
+      if (log.exercise.name == appState.selectedExercise.name) {
+        return log;
+      }
+    }
+
+    return null;
+  }
+
+  String _formatWeight(double value) {
+    if (value % 1 == 0) {
+      return value.toInt().toString();
+    }
+
+    return value.toStringAsFixed(1);
+  }
+}
+
+class _RecommendationCard extends StatelessWidget {
+  const _RecommendationCard({
+    required this.lastText,
+    required this.recommendationText,
+  });
+
+  final String lastText;
+  final String recommendationText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+      decoration: BoxDecoration(
+        color: AppColors.card.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColors.accent.withOpacity(0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.trending_up,
+            color: AppColors.accent,
+            size: 29,
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Рекомендация',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'В прошлый раз: $lastText',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  recommendationText,
+                  style: const TextStyle(
+                    color: AppColors.accent,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -195,25 +305,25 @@ class _SetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 63,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      height: 69,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 17),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 15,
+            radius: 18,
             backgroundColor: color,
             child: const Icon(
               Icons.check,
               color: Colors.black,
-              size: 18,
+              size: 20,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 17),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +332,7 @@ class _SetCard extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
               ),
@@ -230,9 +340,9 @@ class _SetCard extends StatelessWidget {
               Text(
                 details,
                 style: const TextStyle(
-                  color: Color(0xFF9C9C9C),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  color: Color(0xFFB8B8B8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

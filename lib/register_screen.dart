@@ -105,87 +105,110 @@ class _RegisterScreenState extends State<RegisterScreen> {
         decoration: AppGradients.background,
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(34, 48, 34, 24),
+            padding: const EdgeInsets.fromLTRB(31, 44, 31, 22),
             children: [
-              const WorkoutLogo(),
-              const SizedBox(height: 10),
+              const TopWideLogo(),
+
+              const SizedBox(height: 23),
+
               const Text(
                 'WorkoutLog',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 25,
+                  fontSize: 29,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 2),
               const Text(
                 'Создайте новый аккаунт',
-                style: TextStyle(color: Colors.white, fontSize: 13),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 26),
 
               _label('Имя'),
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: AppInputDecoration.build(
                   hint: 'Иван Петров',
                   icon: Icons.person_outline,
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
               _label('Email'),
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: AppInputDecoration.build(
                   hint: 'your@email.com',
                   icon: Icons.mail_outline,
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
               _label('Пароль'),
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: AppInputDecoration.build(
                   hint: 'Минимум 8 символов',
                   icon: Icons.lock_outline,
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 13),
 
               _label('Подтвердите пароль'),
               TextField(
                 controller: repeatPasswordController,
                 obscureText: true,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: AppInputDecoration.build(
                   hint: 'Повторите пароль',
                   icon: Icons.lock_outline,
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 17),
 
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 25,
+                    height: 25,
                     child: Checkbox(
                       value: accepted,
                       activeColor: AppColors.accent,
                       checkColor: Colors.black,
-                      side: const BorderSide(color: Colors.white70),
+                      side: const BorderSide(color: Colors.white, width: 2),
                       onChanged: (value) {
                         setState(() {
                           accepted = value ?? false;
@@ -193,18 +216,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 9),
+                  const SizedBox(width: 12),
                   const Expanded(
                     child: Text.rich(
                       TextSpan(
                         text: 'Я согласен с ',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                        style: TextStyle(color: Colors.white, fontSize: 13),
                         children: [
                           TextSpan(
                             text: 'условиями использования\n',
                             style: TextStyle(
                               color: AppColors.accent,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                           TextSpan(text: 'и '),
@@ -212,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             text: 'политикой конфиденциальности',
                             style: TextStyle(
                               color: AppColors.accent,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ],
@@ -222,21 +245,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 26),
 
               PrimaryGreenButton(
                 text: loading ? 'Создаем...' : 'Создать аккаунт',
+                height: 57,
                 onPressed: loading ? null : register,
               ),
 
-              const SizedBox(height: 4),
+              const SizedBox(height: 14),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     'Уже есть аккаунт?',
-                    style: TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
@@ -244,6 +268,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       'Войти',
                       style: TextStyle(
                         color: AppColors.accent,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -259,10 +284,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _label(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.only(bottom: 7),
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white70, fontSize: 12),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

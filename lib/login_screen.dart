@@ -66,15 +66,17 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: AppGradients.background,
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(34, 74, 34, 24),
+            padding: const EdgeInsets.fromLTRB(31, 60, 31, 24),
             children: [
-              const WorkoutLogo(),
-              const SizedBox(height: 24),
+              const TopWideLogo(),
+
+              const SizedBox(height: 26),
+
               const Text(
                 'WorkoutLog',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 25,
+                  fontSize: 29,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.2,
                 ),
@@ -84,56 +86,73 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Войдите в свой аккаунт',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 13,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 34),
+
+              const SizedBox(height: 35),
 
               const Text(
                 'Email',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 7),
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: AppInputDecoration.build(
                   hint: 'your@email.com',
                   icon: Icons.mail_outline,
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 15),
 
               const Text(
                 'Пароль',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 7),
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: AppInputDecoration.build(
                   hint: '********',
                   icon: Icons.lock_outline,
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 15),
 
               Row(
                 children: [
                   SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 25,
+                    height: 25,
                     child: Checkbox(
                       value: rememberMe,
                       activeColor: AppColors.accent,
                       checkColor: Colors.black,
-                      side: const BorderSide(color: Colors.white70),
+                      side: const BorderSide(color: Colors.white, width: 2),
                       onChanged: (value) {
                         setState(() {
                           rememberMe = value ?? false;
@@ -141,11 +160,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
                       'запомнить меня',
-                      style: TextStyle(color: Colors.white, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                   TextButton(
@@ -154,30 +176,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Забыли пароль?',
                       style: TextStyle(
                         color: AppColors.accent,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 26),
+              const SizedBox(height: 32),
 
               PrimaryGreenButton(
                 text: loading ? 'Входим...' : 'Войти',
                 icon: Icons.login,
+                height: 57,
                 onPressed: loading ? null : login,
               ),
 
-              const SizedBox(height: 6),
+              const SizedBox(height: 16),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     'Нет аккаунта?',
-                    style: TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ),
                   TextButton(
                     onPressed: () {
@@ -192,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Зарегистрироваться',
                       style: TextStyle(
                         color: AppColors.accent,
-                        fontSize: 13,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),

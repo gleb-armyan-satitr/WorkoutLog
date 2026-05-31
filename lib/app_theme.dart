@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const Color bgTop = Color(0xFF2E2E2E);
-  static const Color bgBottom = Color(0xFFA5A5A5);
+  static const Color bgBottom = Color(0xFFA8A8A8);
+
   static const Color card = Color(0xFF202020);
-  static const Color cardSoft = Color(0xFF2A2A2A);
+  static const Color cardSoft = Color(0xFF2B2B2B);
+  static const Color darkButton = Color(0xFF242424);
+
   static const Color accent = Color(0xFF55F58A);
   static const Color yellow = Color(0xFFFFD83D);
-  static const Color inactive = Color(0xFF4D4D4D);
+  static const Color inactive = Color(0xFF5B5B5B);
   static const Color danger = Color(0xFFFF3045);
+
   static const Color textMuted = Color(0xFFCFCFCF);
 }
 
@@ -26,26 +30,61 @@ class AppGradients {
 }
 
 class WorkoutLogo extends StatelessWidget {
-  const WorkoutLogo({super.key, this.size = 58});
+  const WorkoutLogo({
+    super.key,
+    this.width = 58,
+    this.height = 58,
+    this.compact = true,
+  });
 
-  final double size;
+  final double width;
+  final double height;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      width: compact ? 59 : width,
+      height: compact ? 56 : height,
       decoration: BoxDecoration(
         color: AppColors.accent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Center(
         child: Text(
           'W',
           style: TextStyle(
             color: Colors.black,
-            fontSize: size * 0.48,
+            fontSize: compact ? 31 : 34,
             fontWeight: FontWeight.w900,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TopWideLogo extends StatelessWidget {
+  const TopWideLogo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 57,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.accent,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: const Center(
+        child: Text(
+          'W',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            height: 1,
           ),
         ),
       ),
@@ -60,17 +99,24 @@ class AppInputDecoration {
   }) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Color(0xFF777777)),
+      hintStyle: const TextStyle(
+        color: Color(0xFFBEBEBE),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
       prefixIcon: icon == null
           ? null
           : Icon(
               icon,
               color: AppColors.accent,
-              size: 20,
+              size: 24,
             ),
       filled: true,
       fillColor: AppColors.card,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 19,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(13),
         borderSide: BorderSide.none,
@@ -85,16 +131,18 @@ class PrimaryGreenButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     this.icon,
+    this.height = 56,
   });
 
   final String text;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 54,
+      height: height,
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
@@ -113,15 +161,61 @@ class PrimaryGreenButton extends StatelessWidget {
               text,
               style: const TextStyle(
                 color: Colors.black,
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: FontWeight.w700,
               ),
             ),
             if (icon != null) ...[
               const SizedBox(width: 10),
-              Icon(icon, color: Colors.black),
+              Icon(icon, color: Colors.black, size: 24),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class DarkActionButton extends StatelessWidget {
+  const DarkActionButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.height = 56,
+    this.fontSize = 16,
+  });
+
+  final String text;
+  final VoidCallback? onPressed;
+  final double height;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: AppColors.darkButton,
+          side: const BorderSide(
+            color: AppColors.accent,
+            width: 2,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: fontSize,
+            height: 1.15,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );
@@ -133,33 +227,19 @@ class OutlineGreenButton extends StatelessWidget {
     super.key,
     required this.text,
     required this.onPressed,
+    this.height = 56,
   });
 
   final String text;
   final VoidCallback? onPressed;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.accent, width: 2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
+    return DarkActionButton(
+      text: text,
+      onPressed: onPressed,
+      height: height,
     );
   }
 }
