@@ -26,190 +26,267 @@ class HomeScreen extends StatelessWidget {
     return DecoratedBox(
       decoration: AppGradients.background,
       child: SafeArea(
-        child: Stack(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(22, 25, 22, 34),
           children: [
-            ListView(
-              padding: const EdgeInsets.fromLTRB(22, 25, 22, 105),
-              children: [
-                Text(
-                  exercise.name,
+            Text(
+              exercise.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 31,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              appState.setProgressText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            Container(
+              height: 157,
+              decoration: BoxDecoration(
+                color: AppColors.card.withOpacity(0.96),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.18),
+                  width: 1,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  appState.workoutStatusText,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 31,
+                    color: AppColors.accent,
+                    fontSize: 34,
+                    height: 1.25,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  appState.setProgressText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              ),
+            ),
 
-                const SizedBox(height: 15),
+            const SizedBox(height: 13),
 
-                Container(
-                  height: 157,
-                  decoration: BoxDecoration(
-                    color: AppColors.card.withOpacity(0.96),
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.18),
-                      width: 1,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      appState.workoutFinished
-                          ? 'Тренировка\nзавершена!'
-                          : 'Выполняется\nподход...',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.accent,
-                        fontSize: 34,
-                        height: 1.25,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ),
+            _RecommendationCard(
+              lastText: lastLog == null
+                  ? 'Пока нет прошлой тренировки'
+                  : '${formatWeight(lastLog.weight)}кг × ${lastLog.reps}',
+              recommendationText:
+                  'Попробуй ${formatWeight(recommendedWeight)}кг × ${exercise.reps}',
+              completedText: lastLog == null
+                  ? 'Создай первую запись прогресса'
+                  : lastLog.isFullyCompleted
+                      ? 'Прошлая тренировка выполнена полностью'
+                      : 'Лучше повторить прошлый вес',
+            ),
 
-                const SizedBox(height: 13),
+            const SizedBox(height: 17),
 
-                _RecommendationCard(
-                  lastText: lastLog == null
-                      ? 'Пока нет прошлой тренировки'
-                      : '${formatWeight(lastLog.weight)}кг × ${lastLog.reps}',
-                  recommendationText:
-                      'Попробуй ${formatWeight(recommendedWeight)}кг × ${exercise.reps}',
-                  completedText: lastLog == null
-                      ? 'Создай первую запись прогресса'
-                      : lastLog.isFullyCompleted
-                          ? 'Прошлая тренировка выполнена полностью'
-                          : 'Лучше повторить прошлый вес',
-                ),
+            for (int i = 0; i < exercise.sets; i++)
+              _SetCard(
+                title: 'Подход ${i + 1}',
+                details:
+                    '${formatWeight(exercise.weight)}кг × ${exercise.reps}',
+                status: appState.statusForSet(i),
+              ),
 
-                const SizedBox(height: 17),
+            const SizedBox(height: 18),
 
-                for (int i = 0; i < exercise.sets; i++)
-                  _SetCard(
-                    title: 'Подход ${i + 1}',
-                    details: '${formatWeight(exercise.weight)}кг × ${exercise.reps}',
-                    status: appState.statusForSet(i),
-                  ),
-
-                const SizedBox(height: 18),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: DarkActionButton(
-                        text: 'Отдых',
-                        height: 60,
-                        fontSize: 17,
-                        onPressed: onStartRest,
-                      ),
-                    ),
-                    const SizedBox(width: 13),
-                    Expanded(
-                      child: DarkActionButton(
-                        text: 'Завершить\nподход',
-                        height: 60,
-                        fontSize: 17,
-                        onPressed: () async {
-                          final finished = await appState.completeCurrentSet();
-                          onChanged();
-
-                          if (!context.mounted) return;
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: AppColors.card,
-                              content: Text(
-                                finished
-                                    ? 'Тренировка сохранена. Следующий вес: ${formatWeight(recommendedWeight)}кг'
-                                    : 'Подход завершён',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                if (appState.workoutFinished) ...[
-                  const SizedBox(height: 13),
-                  DarkActionButton(
-                    text:
-                        'Начать новую тренировку с ${formatWeight(recommendedWeight)}кг',
+            Row(
+              children: [
+                Expanded(
+                  child: DarkActionButton(
+                    text: 'Отдых',
                     height: 60,
-                    fontSize: 16,
-                    onPressed: () async {
-                      await appState.startNextWorkoutWithRecommendedWeight();
-                      onChanged();
-                    },
+                    fontSize: 17,
+                    onPressed: appState.completedSets.isEmpty ||
+                            appState.workoutFinished
+                        ? null
+                        : onStartRest,
                   ),
-                ],
+                ),
+                const SizedBox(width: 13),
+                Expanded(
+                  child: DarkActionButton(
+                    text: appState.setInProgress
+                        ? 'Завершить\nподход'
+                        : appState.workoutFinished
+                            ? 'Завершено'
+                            : 'Начать\nподход',
+                    height: 60,
+                    fontSize: 17,
+                    onPressed: appState.workoutFinished
+                        ? null
+                        : () async {
+                            if (!appState.setInProgress) {
+                              appState.startCurrentSet();
+                              onChanged();
+                              return;
+                            }
 
-                const SizedBox(height: 13),
+                            final finished =
+                                await appState.completeCurrentSet();
 
-                Center(
-                  child: SizedBox(
-                    width: 178,
-                    child: DarkActionButton(
-                      text: 'Выбрать\nупражнение',
-                      height: 60,
-                      fontSize: 17,
-                      onPressed: () async {
-                        final result = await Navigator.push<Exercise>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => LibraryScreen(
-                              exercises: appState.exercises,
-                            ),
-                          ),
-                        );
+                            final nextRecommendedWeight =
+                                appState.recommendedWeightFor(
+                              appState.selectedExercise,
+                            );
 
-                        if (result != null) {
-                          appState.selectExercise(result);
-                          onChanged();
-                        }
-                      },
-                    ),
+                            onChanged();
+
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: AppColors.card,
+                                content: Text(
+                                  finished
+                                      ? 'Тренировка сохранена. Следующий вес: ${formatWeight(nextRecommendedWeight)}кг'
+                                      : 'Подход завершён',
+                                ),
+                              ),
+                            );
+                          },
                   ),
                 ),
               ],
             ),
 
-            Positioned(
-              right: 22,
-              bottom: 22,
-              child: SizedBox(
-                width: 66,
-                height: 66,
-                child: FloatingActionButton(
-                  backgroundColor: AppColors.accent,
-                  elevation: 0,
+            if (appState.setInProgress && !appState.workoutFinished) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 58,
+                width: double.infinity,
+                child: OutlinedButton.icon(
                   onPressed: () async {
-                    final result = await Navigator.push<Exercise>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AddExerciseScreen(),
-                      ),
+                    await appState.failCurrentSet();
+
+                    final nextRecommendedWeight =
+                        appState.recommendedWeightFor(
+                      appState.selectedExercise,
                     );
 
-                    if (result != null) {
-                      await appState.addExercise(result);
-                      onChanged();
-                    }
+                    onChanged();
+
+                    if (!context.mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: AppColors.card,
+                        content: Text(
+                          'Тренировка сохранена как неполная. Следующий вес: ${formatWeight(nextRecommendedWeight)}кг',
+                        ),
+                      ),
+                    );
                   },
-                  child: const Icon(Icons.add, color: Colors.black, size: 38),
+                  icon: const Icon(
+                    Icons.close,
+                    color: AppColors.danger,
+                    size: 23,
+                  ),
+                  label: const Text(
+                    'Не получилось',
+                    style: TextStyle(
+                      color: AppColors.danger,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: AppColors.darkButton,
+                    side: const BorderSide(
+                      color: AppColors.danger,
+                      width: 2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ),
+            ],
+
+            if (appState.workoutFinished) ...[
+              const SizedBox(height: 13),
+              DarkActionButton(
+                text:
+                    'Начать новую тренировку с ${formatWeight(recommendedWeight)}кг',
+                height: 60,
+                fontSize: 16,
+                onPressed: () async {
+                  await appState.startNextWorkoutWithRecommendedWeight();
+                  onChanged();
+                },
+              ),
+            ],
+
+            const SizedBox(height: 15),
+
+            Row(
+              children: [
+                Expanded(
+                  child: DarkActionButton(
+                    text: 'Выбрать\nупражнение',
+                    height: 60,
+                    fontSize: 17,
+                    onPressed: () async {
+                      final result = await Navigator.push<Exercise>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => LibraryScreen(
+                            exercises: appState.exercises,
+                          ),
+                        ),
+                      );
+
+                      if (result != null) {
+                        appState.selectExercise(result);
+                        onChanged();
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 13),
+                SizedBox(
+                  width: 72,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final result = await Navigator.push<Exercise>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddExerciseScreen(),
+                        ),
+                      );
+
+                      if (result != null) {
+                        await appState.addExercise(result);
+                        onChanged();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.black,
+                      size: 34,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

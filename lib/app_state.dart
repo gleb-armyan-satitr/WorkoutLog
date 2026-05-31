@@ -191,18 +191,14 @@ class UserProfileData {
     required String fallbackName,
   }) {
     return UserProfileData(
-      name: data['name']?.toString().isNotEmpty == true
-          ? data['name'].toString()
-          : fallbackName,
-      email: data['email']?.toString().isNotEmpty == true
-          ? data['email'].toString()
-          : fallbackEmail,
-      phone: data['phone']?.toString() ?? '+7 999 123-45-67',
-      birthDate: data['birthDate']?.toString() ?? '15 марта 1995',
-      goal: data['goal']?.toString() ?? 'Набор мышечной массы',
-      currentWeight: _toDouble(data['currentWeight'], 78),
-      targetWeight: _toDouble(data['targetWeight'], 82),
-      bodyFat: _toDouble(data['bodyFat'], 12),
+      name: _readString(data['name'], fallbackName),
+      email: _readString(data['email'], fallbackEmail),
+      phone: _readString(data['phone'], ''),
+      birthDate: _readString(data['birthDate'], ''),
+      goal: _readString(data['goal'], 'Набор мышечной массы'),
+      currentWeight: _toDouble(data['currentWeight'], 0),
+      targetWeight: _toDouble(data['targetWeight'], 0),
+      bodyFat: _toDouble(data['bodyFat'], 0),
       weeklyWorkoutsGoal: _toInt(data['weeklyWorkoutsGoal'], 4),
       workoutsDone: _toInt(data['workoutsDone'], 0),
     );
@@ -222,33 +218,57 @@ class WorkoutAppState {
   List<WorkoutLog> logs = [];
 
   UserProfileData profile = UserProfileData(
-    name: 'Иван Петров',
-    email: 'ivan@example.com',
-    phone: '+7 999 123-45-67',
-    birthDate: '15 марта 1995',
+    name: '',
+    email: '',
+    phone: '',
+    birthDate: '',
     goal: 'Набор мышечной массы',
-    currentWeight: 78,
-    targetWeight: 82,
-    bodyFat: 12,
+    currentWeight: 0,
+    targetWeight: 0,
+    bodyFat: 0,
     weeklyWorkoutsGoal: 4,
     workoutsDone: 0,
   );
 
   int currentSetIndex = 0;
+  bool setInProgress = false;
+  bool workoutEnded = false;
+  bool workoutFailed = false;
+
   final Set<int> completedSets = {};
 
   double progressionStep = 2.5;
 
   bool get workoutFinished {
-    return completedSets.length >= selectedExercise.sets;
+    return workoutEnded || completedSets.length >= selectedExercise.sets;
   }
 
   String get setProgressText {
-    if (workoutFinished) {
+    if (workoutFailed) {
+      return 'Тренировка остановлена';
+    }
+
+    if (completedSets.length >= selectedExercise.sets) {
       return 'Все подходы завершены';
     }
 
     return 'Подход ${currentSetIndex + 1} из ${selectedExercise.sets}';
+  }
+
+  String get workoutStatusText {
+    if (workoutFailed) {
+      return 'Подход\nне выполнен';
+    }
+
+    if (completedSets.length >= selectedExercise.sets) {
+      return 'Тренировка\nзавершена!';
+    }
+
+    if (setInProgress) {
+      return 'Выполняется\nподход...';
+    }
+
+    return 'Готов к\nподходу';
   }
 
   void _setDefaults() {
@@ -295,10 +315,16 @@ class WorkoutAppState {
   Future<void> loadFromFirestore() async {
     final user = FirebaseAuth.instance.currentUser;
 
-    final fallbackEmail = user?.email ?? profile.email;
-    final fallbackName = user?.displayName?.isNotEmpty == true
-        ? user!.displayName!
-        : profile.name;
+    if (user != null) {
+      await user.reload();
+    }
+
+    final freshUser = FirebaseAuth.instance.currentUser;
+
+    final fallbackEmail = freshUser?.email ?? '';
+    final fallbackName = freshUser?.displayName?.trim().isNotEmpty == true
+        ? freshUser!.displayName!.trim()
+        : 'Пользователь';
 
     profile = profile.copyWith(
       email: fallbackEmail,
@@ -318,13 +344,23 @@ class WorkoutAppState {
           fallbackName: fallbackName,
         );
       } else {
+        profile = UserProfileData(
+          name: fallbackName,
+          email: fallbackEmail,
+          phone: '',
+          birthDate: '',
+          goal: 'Набор мышечной массы',
+          currentWeight: 0,
+          targetWeight: 0,
+          bodyFat: 0,
+          weeklyWorkoutsGoal: 4,
+          workoutsDone: 0,
+        );
+
         await userRef.set(profile.toMap(), SetOptions(merge: true));
       }
 
-      final exercisesSnap = await userRef
-          .collection('exercises')
-          .orderBy('updatedAt', descending: true)
-          .get();
+      final exercisesSnap = await userRef.collection('exercises').get();
 
       if (exercisesSnap.docs.isNotEmpty) {
         exercises = exercisesSnap.docs.map(Exercise.fromDoc).toList();
@@ -358,8 +394,13 @@ class WorkoutAppState {
 
   int statusForSet(int index) {
     if (completedSets.contains(index)) return 2;
-    if (!workoutFinished && index == currentSetIndex) return 1;
+    if (setInProgress && !workoutFinished && index == currentSetIndex) return 1;
     return 0;
+  }
+
+  void startCurrentSet() {
+    if (workoutFinished) return;
+    setInProgress = true;
   }
 
   void selectExercise(Exercise exercise) {
@@ -411,9 +452,17 @@ class WorkoutAppState {
   Future<bool> completeCurrentSet() async {
     if (workoutFinished) return true;
 
+    if (!setInProgress) {
+      return false;
+    }
+
     completedSets.add(currentSetIndex);
+    setInProgress = false;
 
     if (completedSets.length >= selectedExercise.sets) {
+      workoutEnded = true;
+      workoutFailed = false;
+
       final nextWeight = selectedExercise.weight + progressionStep;
 
       final log = WorkoutLog(
@@ -439,6 +488,32 @@ class WorkoutAppState {
 
     currentSetIndex++;
     return false;
+  }
+
+  Future<void> failCurrentSet() async {
+    if (workoutFinished) return;
+
+    setInProgress = false;
+    workoutEnded = true;
+    workoutFailed = true;
+
+    final log = WorkoutLog(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      exerciseId: selectedExercise.id,
+      exerciseName: selectedExercise.name,
+      weight: selectedExercise.weight,
+      reps: selectedExercise.reps,
+      sets: selectedExercise.sets,
+      setsCompleted: completedSets.length,
+      recommendedNextWeight: selectedExercise.weight,
+      date: DateTime.now(),
+    );
+
+    logs.insert(0, log);
+    profile = profile.copyWith(workoutsDone: logs.length);
+
+    await _saveWorkoutLog(log);
+    await saveProfile(profile);
   }
 
   Future<void> startNextWorkoutWithRecommendedWeight() async {
@@ -532,8 +607,16 @@ class WorkoutAppState {
 
   void resetWorkout() {
     currentSetIndex = 0;
+    setInProgress = false;
+    workoutEnded = false;
+    workoutFailed = false;
     completedSets.clear();
   }
+}
+
+String _readString(dynamic value, String fallback) {
+  final text = value?.toString().trim() ?? '';
+  return text.isEmpty ? fallback : text;
 }
 
 int _toInt(dynamic value, int fallback) {

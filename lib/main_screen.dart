@@ -4,6 +4,7 @@ import 'app_state.dart';
 import 'app_theme.dart';
 import 'history_screen.dart';
 import 'home_screen.dart';
+import 'notification_service.dart';
 import 'profile_screen.dart';
 import 'rest_screen.dart';
 
@@ -29,6 +30,20 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> loadApp() async {
     await appState.loadFromFirestore();
+
+    await NotificationService.instance.initialize(
+      onForegroundMessage: (title, body) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.card,
+            content: Text('$title\n$body'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      },
+    );
 
     if (mounted) {
       setState(() {

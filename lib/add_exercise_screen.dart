@@ -26,7 +26,20 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
     if (name.isEmpty || weight == null || reps == null || sets == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Заполните все поля корректно')),
+        const SnackBar(
+          backgroundColor: AppColors.card,
+          content: Text('Заполните все поля корректно'),
+        ),
+      );
+      return;
+    }
+
+    if (weight <= 0 || reps <= 0 || sets <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: AppColors.card,
+          content: Text('Вес, повторения и подходы должны быть больше 0'),
+        ),
       );
       return;
     }
@@ -58,55 +71,104 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
         decoration: AppGradients.background,
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(29, 34, 29, 32),
+            padding: const EdgeInsets.fromLTRB(26, 32, 26, 32),
             children: [
-              const Text(
-                'Новое упражнение',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 27,
-                  decoration: TextDecoration.underline,
-                  decorationColor: AppColors.accent,
-                  decorationThickness: 2,
-                  fontWeight: FontWeight.w900,
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 29,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      'Новое упражнение',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 29,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 22),
+
+              Container(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: AppColors.accent.withOpacity(0.25),
+                  ),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.fitness_center,
+                      color: AppColors.accent,
+                      size: 34,
+                    ),
+                    SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        'Добавьте упражнение, укажите рабочий вес, повторения и подходы.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          height: 1.3,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 36),
+              const SizedBox(height: 24),
 
-              _FieldBlock(
+              _ExerciseField(
                 label: 'Название упражнения',
                 controller: nameController,
-                keyboardType: TextInputType.text,
-                suffix: Icons.keyboard_arrow_down,
+                icon: Icons.sports_gymnastics,
+                hint: 'Жим лежа',
               ),
-
-              _FieldBlock(
+              _ExerciseField(
                 label: 'Рабочий вес',
                 controller: weightController,
+                icon: Icons.monitor_weight_outlined,
+                hint: '80',
+                suffix: 'кг',
                 keyboardType: TextInputType.number,
-                suffixText: 'кг',
               ),
-
-              _FieldBlock(
+              _ExerciseField(
                 label: 'Повторения',
                 controller: repsController,
+                icon: Icons.repeat,
+                hint: '8',
+                suffix: 'раз',
                 keyboardType: TextInputType.number,
-                suffixText: 'раз',
               ),
-
-              _FieldBlock(
+              _ExerciseField(
                 label: 'Подходы',
                 controller: setsController,
+                icon: Icons.format_list_numbered,
+                hint: '3',
+                suffix: 'подхода',
                 keyboardType: TextInputType.number,
-                suffixText: 'подхода',
               ),
 
               const SizedBox(height: 18),
 
               PrimaryGreenButton(
                 text: 'Сохранить упражнение',
-                height: 60,
+                height: 62,
                 onPressed: save,
               ),
             ],
@@ -117,68 +179,90 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   }
 }
 
-class _FieldBlock extends StatelessWidget {
-  const _FieldBlock({
+class _ExerciseField extends StatelessWidget {
+  const _ExerciseField({
     required this.label,
     required this.controller,
-    required this.keyboardType,
+    required this.icon,
+    required this.hint,
     this.suffix,
-    this.suffixText,
+    this.keyboardType = TextInputType.text,
   });
 
   final String label;
   final TextEditingController controller;
+  final IconData icon;
+  final String hint;
+  final String? suffix;
   final TextInputType keyboardType;
-  final IconData? suffix;
-  final String? suffixText;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 19),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      height: 76,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 7),
-            child: Text(
-              label,
+          Icon(
+            icon,
+            color: AppColors.accent,
+            size: 30,
+          ),
+          const SizedBox(width: 17),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  cursorColor: AppColors.accent,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: hint,
+                    hintStyle: const TextStyle(
+                      color: Colors.white38,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (suffix != null) ...[
+            const SizedBox(width: 8),
+            Text(
+              suffix!,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w800,
               ),
             ),
-          ),
-          TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
-            decoration: InputDecoration(
-              suffixIcon: suffix == null
-                  ? null
-                  : Icon(suffix, color: Colors.white70),
-              suffixText: suffixText,
-              suffixStyle: const TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.w700,
-              ),
-              filled: true,
-              fillColor: AppColors.card,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 20,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(17),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
