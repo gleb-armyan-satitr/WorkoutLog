@@ -18,7 +18,9 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
   void save() {
     final name = nameController.text.trim();
-    final weight = int.tryParse(weightController.text.trim());
+    final weight = double.tryParse(
+      weightController.text.trim().replaceAll(',', '.'),
+    );
     final reps = int.tryParse(repsController.text.trim());
     final sets = int.tryParse(setsController.text.trim());
 
@@ -62,7 +64,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                 'Новое упражнение',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 27,
                   decoration: TextDecoration.underline,
                   decorationColor: AppColors.accent,
                   decorationThickness: 2,
@@ -80,7 +82,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
               ),
 
               _FieldBlock(
-                label: 'Вес',
+                label: 'Рабочий вес',
                 controller: weightController,
                 keyboardType: TextInputType.number,
                 suffixText: 'кг',
@@ -90,7 +92,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                 label: 'Повторения',
                 controller: repsController,
                 keyboardType: TextInputType.number,
-                suffixText: 'повторений',
+                suffixText: 'раз',
               ),
 
               _FieldBlock(
@@ -104,6 +106,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
               PrimaryGreenButton(
                 text: 'Сохранить упражнение',
+                height: 60,
                 onPressed: save,
               ),
             ],
@@ -132,18 +135,18 @@ class _FieldBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 19),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 6),
+            padding: const EdgeInsets.only(left: 4, bottom: 7),
             child: Text(
               label,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -152,7 +155,7 @@ class _FieldBlock extends StatelessWidget {
             keyboardType: keyboardType,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 15,
+              fontSize: 17,
               fontWeight: FontWeight.w800,
             ),
             decoration: InputDecoration(
@@ -168,7 +171,7 @@ class _FieldBlock extends StatelessWidget {
               fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
-                vertical: 18,
+                vertical: 20,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(17),

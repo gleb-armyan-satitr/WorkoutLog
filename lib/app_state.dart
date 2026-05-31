@@ -1,3 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+
 class Exercise {
   Exercise({
     required this.id,
@@ -9,25 +13,245 @@ class Exercise {
 
   final String id;
   final String name;
-  final int weight;
+  final double weight;
   final int reps;
   final int sets;
+
+  Exercise copyWith({
+    String? id,
+    String? name,
+    double? weight,
+    int? reps,
+    int? sets,
+  }) {
+    return Exercise(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      weight: weight ?? this.weight,
+      reps: reps ?? this.reps,
+      sets: sets ?? this.sets,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'weight': weight,
+      'reps': reps,
+      'sets': sets,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
+
+  factory Exercise.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? {};
+
+    return Exercise(
+      id: doc.id,
+      name: data['name']?.toString() ?? 'Упражнение',
+      weight: _toDouble(data['weight'], 0),
+      reps: _toInt(data['reps'], 8),
+      sets: _toInt(data['sets'], 3),
+    );
+  }
 }
 
 class WorkoutLog {
   WorkoutLog({
-    required this.exercise,
-    required this.date,
+    required this.id,
+    required this.exerciseId,
+    required this.exerciseName,
+    required this.weight,
+    required this.reps,
+    required this.sets,
     required this.setsCompleted,
+    required this.recommendedNextWeight,
+    required this.date,
   });
 
-  final Exercise exercise;
-  final DateTime date;
+  final String id;
+  final String exerciseId;
+  final String exerciseName;
+  final double weight;
+  final int reps;
+  final int sets;
   final int setsCompleted;
+  final double recommendedNextWeight;
+  final DateTime date;
+
+  bool get isFullyCompleted => setsCompleted >= sets;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'exerciseId': exerciseId,
+      'exerciseName': exerciseName,
+      'weight': weight,
+      'reps': reps,
+      'sets': sets,
+      'setsCompleted': setsCompleted,
+      'recommendedNextWeight': recommendedNextWeight,
+      'createdAt': Timestamp.fromDate(date),
+    };
+  }
+
+  factory WorkoutLog.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? {};
+    final createdAt = data['createdAt'];
+
+    DateTime date = DateTime.now();
+
+    if (createdAt is Timestamp) {
+      date = createdAt.toDate();
+    }
+
+    return WorkoutLog(
+      id: doc.id,
+      exerciseId: data['exerciseId']?.toString() ?? '',
+      exerciseName: data['exerciseName']?.toString() ?? 'Упражнение',
+      weight: _toDouble(data['weight'], 0),
+      reps: _toInt(data['reps'], 8),
+      sets: _toInt(data['sets'], 3),
+      setsCompleted: _toInt(data['setsCompleted'], 0),
+      recommendedNextWeight: _toDouble(data['recommendedNextWeight'], 0),
+      date: date,
+    );
+  }
+}
+
+class UserProfileData {
+  UserProfileData({
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.birthDate,
+    required this.goal,
+    required this.currentWeight,
+    required this.targetWeight,
+    required this.bodyFat,
+    required this.weeklyWorkoutsGoal,
+    required this.workoutsDone,
+  });
+
+  final String name;
+  final String email;
+  final String phone;
+  final String birthDate;
+  final String goal;
+  final double currentWeight;
+  final double targetWeight;
+  final double bodyFat;
+  final int weeklyWorkoutsGoal;
+  final int workoutsDone;
+
+  UserProfileData copyWith({
+    String? name,
+    String? email,
+    String? phone,
+    String? birthDate,
+    String? goal,
+    double? currentWeight,
+    double? targetWeight,
+    double? bodyFat,
+    int? weeklyWorkoutsGoal,
+    int? workoutsDone,
+  }) {
+    return UserProfileData(
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      birthDate: birthDate ?? this.birthDate,
+      goal: goal ?? this.goal,
+      currentWeight: currentWeight ?? this.currentWeight,
+      targetWeight: targetWeight ?? this.targetWeight,
+      bodyFat: bodyFat ?? this.bodyFat,
+      weeklyWorkoutsGoal: weeklyWorkoutsGoal ?? this.weeklyWorkoutsGoal,
+      workoutsDone: workoutsDone ?? this.workoutsDone,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'birthDate': birthDate,
+      'goal': goal,
+      'currentWeight': currentWeight,
+      'targetWeight': targetWeight,
+      'bodyFat': bodyFat,
+      'weeklyWorkoutsGoal': weeklyWorkoutsGoal,
+      'workoutsDone': workoutsDone,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
+
+  factory UserProfileData.fromMap(
+    Map<String, dynamic> data, {
+    required String fallbackEmail,
+    required String fallbackName,
+  }) {
+    return UserProfileData(
+      name: data['name']?.toString().isNotEmpty == true
+          ? data['name'].toString()
+          : fallbackName,
+      email: data['email']?.toString().isNotEmpty == true
+          ? data['email'].toString()
+          : fallbackEmail,
+      phone: data['phone']?.toString() ?? '+7 999 123-45-67',
+      birthDate: data['birthDate']?.toString() ?? '15 марта 1995',
+      goal: data['goal']?.toString() ?? 'Набор мышечной массы',
+      currentWeight: _toDouble(data['currentWeight'], 78),
+      targetWeight: _toDouble(data['targetWeight'], 82),
+      bodyFat: _toDouble(data['bodyFat'], 12),
+      weeklyWorkoutsGoal: _toInt(data['weeklyWorkoutsGoal'], 4),
+      workoutsDone: _toInt(data['workoutsDone'], 0),
+    );
+  }
 }
 
 class WorkoutAppState {
   WorkoutAppState() {
+    _setDefaults();
+  }
+
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  late List<Exercise> exercises;
+  late Exercise selectedExercise;
+
+  List<WorkoutLog> logs = [];
+
+  UserProfileData profile = UserProfileData(
+    name: 'Иван Петров',
+    email: 'ivan@example.com',
+    phone: '+7 999 123-45-67',
+    birthDate: '15 марта 1995',
+    goal: 'Набор мышечной массы',
+    currentWeight: 78,
+    targetWeight: 82,
+    bodyFat: 12,
+    weeklyWorkoutsGoal: 4,
+    workoutsDone: 0,
+  );
+
+  int currentSetIndex = 0;
+  final Set<int> completedSets = {};
+
+  double progressionStep = 2.5;
+
+  bool get workoutFinished {
+    return completedSets.length >= selectedExercise.sets;
+  }
+
+  String get setProgressText {
+    if (workoutFinished) {
+      return 'Все подходы завершены';
+    }
+
+    return 'Подход ${currentSetIndex + 1} из ${selectedExercise.sets}';
+  }
+
+  void _setDefaults() {
     final defaultExercise = Exercise(
       id: 'bench_press',
       name: 'Жим лежа',
@@ -57,24 +281,79 @@ class WorkoutAppState {
     selectedExercise = defaultExercise;
   }
 
-  late List<Exercise> exercises;
-  late Exercise selectedExercise;
-
-  final List<WorkoutLog> logs = [];
-
-  int currentSetIndex = 0;
-  final Set<int> completedSets = {};
-
-  bool get workoutFinished {
-    return completedSets.length >= selectedExercise.sets;
+  String? get _uid {
+    return FirebaseAuth.instance.currentUser?.uid;
   }
 
-  String get setProgressText {
-    if (workoutFinished) {
-      return 'Все подходы завершены';
-    }
+  DocumentReference<Map<String, dynamic>>? get _userRef {
+    final uid = _uid;
+    if (uid == null) return null;
 
-    return 'Подход ${currentSetIndex + 1} из ${selectedExercise.sets}';
+    return _db.collection('users').doc(uid);
+  }
+
+  Future<void> loadFromFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    final fallbackEmail = user?.email ?? profile.email;
+    final fallbackName = user?.displayName?.isNotEmpty == true
+        ? user!.displayName!
+        : profile.name;
+
+    profile = profile.copyWith(
+      email: fallbackEmail,
+      name: fallbackName,
+    );
+
+    final userRef = _userRef;
+    if (userRef == null) return;
+
+    try {
+      final userSnap = await userRef.get();
+
+      if (userSnap.exists) {
+        profile = UserProfileData.fromMap(
+          userSnap.data() ?? {},
+          fallbackEmail: fallbackEmail,
+          fallbackName: fallbackName,
+        );
+      } else {
+        await userRef.set(profile.toMap(), SetOptions(merge: true));
+      }
+
+      final exercisesSnap = await userRef
+          .collection('exercises')
+          .orderBy('updatedAt', descending: true)
+          .get();
+
+      if (exercisesSnap.docs.isNotEmpty) {
+        exercises = exercisesSnap.docs.map(Exercise.fromDoc).toList();
+        selectedExercise = exercises.first;
+      } else {
+        for (final exercise in exercises) {
+          await userRef.collection('exercises').doc(exercise.id).set(
+                {
+                  ...exercise.toMap(),
+                  'createdAt': FieldValue.serverTimestamp(),
+                },
+                SetOptions(merge: true),
+              );
+        }
+      }
+
+      final logsSnap = await userRef
+          .collection('workout_logs')
+          .orderBy('createdAt', descending: true)
+          .limit(80)
+          .get();
+
+      logs = logsSnap.docs.map(WorkoutLog.fromDoc).toList();
+
+      profile = profile.copyWith(workoutsDone: logs.length);
+      resetWorkout();
+    } catch (e) {
+      debugPrint('Firestore load error: $e');
+    }
   }
 
   int statusForSet(int index) {
@@ -88,25 +367,73 @@ class WorkoutAppState {
     resetWorkout();
   }
 
-  void addExercise(Exercise exercise) {
+  Future<void> addExercise(Exercise exercise) async {
     exercises.insert(0, exercise);
     selectExercise(exercise);
+
+    final userRef = _userRef;
+    if (userRef == null) return;
+
+    try {
+      await userRef.collection('exercises').doc(exercise.id).set(
+        {
+          ...exercise.toMap(),
+          'createdAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      debugPrint('Add exercise error: $e');
+    }
   }
 
-  bool completeCurrentSet() {
+  Future<void> updateSelectedExercise(Exercise updatedExercise) async {
+    selectedExercise = updatedExercise;
+
+    final index = exercises.indexWhere((item) => item.id == updatedExercise.id);
+    if (index != -1) {
+      exercises[index] = updatedExercise;
+    }
+
+    final userRef = _userRef;
+    if (userRef == null) return;
+
+    try {
+      await userRef
+          .collection('exercises')
+          .doc(updatedExercise.id)
+          .set(updatedExercise.toMap(), SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Update exercise error: $e');
+    }
+  }
+
+  Future<bool> completeCurrentSet() async {
     if (workoutFinished) return true;
 
     completedSets.add(currentSetIndex);
 
     if (completedSets.length >= selectedExercise.sets) {
-      logs.insert(
-        0,
-        WorkoutLog(
-          exercise: selectedExercise,
-          date: DateTime.now(),
-          setsCompleted: selectedExercise.sets,
-        ),
+      final nextWeight = selectedExercise.weight + progressionStep;
+
+      final log = WorkoutLog(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        exerciseId: selectedExercise.id,
+        exerciseName: selectedExercise.name,
+        weight: selectedExercise.weight,
+        reps: selectedExercise.reps,
+        sets: selectedExercise.sets,
+        setsCompleted: selectedExercise.sets,
+        recommendedNextWeight: nextWeight,
+        date: DateTime.now(),
       );
+
+      logs.insert(0, log);
+      profile = profile.copyWith(workoutsDone: logs.length);
+
+      await _saveWorkoutLog(log);
+      await saveProfile(profile);
+
       return true;
     }
 
@@ -114,8 +441,123 @@ class WorkoutAppState {
     return false;
   }
 
+  Future<void> startNextWorkoutWithRecommendedWeight() async {
+    final nextWeight = recommendedWeightFor(selectedExercise);
+
+    final updated = selectedExercise.copyWith(weight: nextWeight);
+    await updateSelectedExercise(updated);
+
+    resetWorkout();
+  }
+
+  WorkoutLog? lastLogForExercise(Exercise exercise) {
+    for (final log in logs) {
+      if (log.exerciseId == exercise.id || log.exerciseName == exercise.name) {
+        return log;
+      }
+    }
+
+    return null;
+  }
+
+  double recommendedWeightFor(Exercise exercise) {
+    final lastLog = lastLogForExercise(exercise);
+
+    if (lastLog == null) {
+      return exercise.weight;
+    }
+
+    if (lastLog.isFullyCompleted) {
+      return lastLog.weight + progressionStep;
+    }
+
+    return lastLog.weight;
+  }
+
+  List<WorkoutLog> progressLogsForSelectedExercise() {
+    final result = logs.where((log) {
+      return log.exerciseId == selectedExercise.id ||
+          log.exerciseName == selectedExercise.name;
+    }).toList();
+
+    result.sort((a, b) => a.date.compareTo(b.date));
+    return result;
+  }
+
+  int completedThisWeek() {
+    final now = DateTime.now();
+    final startOfWeek = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
+
+    return logs.where((log) => log.date.isAfter(startOfWeek)).length;
+  }
+
+  Future<void> saveProfile(UserProfileData updatedProfile) async {
+    profile = updatedProfile.copyWith(
+      workoutsDone: logs.length,
+    );
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    try {
+      if (user != null && profile.name.trim().isNotEmpty) {
+        await user.updateDisplayName(profile.name.trim());
+      }
+
+      final userRef = _userRef;
+      if (userRef != null) {
+        await userRef.set(profile.toMap(), SetOptions(merge: true));
+      }
+    } catch (e) {
+      debugPrint('Save profile error: $e');
+    }
+  }
+
+  Future<void> _saveWorkoutLog(WorkoutLog log) async {
+    final userRef = _userRef;
+    if (userRef == null) return;
+
+    try {
+      await userRef
+          .collection('workout_logs')
+          .doc(log.id)
+          .set(log.toMap(), SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Save workout log error: $e');
+    }
+  }
+
   void resetWorkout() {
     currentSetIndex = 0;
     completedSets.clear();
   }
+}
+
+int _toInt(dynamic value, int fallback) {
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+
+  return fallback;
+}
+
+double _toDouble(dynamic value, double fallback) {
+  if (value is int) return value.toDouble();
+  if (value is double) return value;
+  if (value is String) {
+    return double.tryParse(value.replaceAll(',', '.')) ?? fallback;
+  }
+
+  return fallback;
+}
+
+String formatWeight(double value) {
+  if (value % 1 == 0) {
+    return value.toInt().toString();
+  }
+
+  return value.toStringAsFixed(1);
 }

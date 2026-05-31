@@ -20,11 +20,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final exercise = appState.selectedExercise;
-    final lastLog = _lastLogForCurrentExercise();
-
-    final double recommendedWeight = lastLog == null
-        ? exercise.weight.toDouble()
-        : lastLog.exercise.weight + 2.5;
+    final lastLog = appState.lastLogForExercise(exercise);
+    final recommendedWeight = appState.recommendedWeightFor(exercise);
 
     return DecoratedBox(
       decoration: AppGradients.background,
@@ -32,7 +29,7 @@ class HomeScreen extends StatelessWidget {
         child: Stack(
           children: [
             ListView(
-              padding: const EdgeInsets.fromLTRB(22, 25, 22, 98),
+              padding: const EdgeInsets.fromLTRB(22, 25, 22, 105),
               children: [
                 Text(
                   exercise.name,
@@ -85,9 +82,14 @@ class HomeScreen extends StatelessWidget {
                 _RecommendationCard(
                   lastText: lastLog == null
                       ? 'Пока нет прошлой тренировки'
-                      : '${lastLog.exercise.weight}кг × ${lastLog.exercise.reps}',
+                      : '${formatWeight(lastLog.weight)}кг × ${lastLog.reps}',
                   recommendationText:
-                      'Попробуй ${_formatWeight(recommendedWeight)}кг × ${exercise.reps}',
+                      'Попробуй ${formatWeight(recommendedWeight)}кг × ${exercise.reps}',
+                  completedText: lastLog == null
+                      ? 'Создай первую запись прогресса'
+                      : lastLog.isFullyCompleted
+                          ? 'Прошлая тренировка выполнена полностью'
+                          : 'Лучше повторить прошлый вес',
                 ),
 
                 const SizedBox(height: 17),
@@ -95,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                 for (int i = 0; i < exercise.sets; i++)
                   _SetCard(
                     title: 'Подход ${i + 1}',
-                    details: '${exercise.weight}кг × ${exercise.reps}',
+                    details: '${formatWeight(exercise.weight)}кг × ${exercise.reps}',
                     status: appState.statusForSet(i),
                   ),
 
@@ -117,16 +119,18 @@ class HomeScreen extends StatelessWidget {
                         text: 'Завершить\nподход',
                         height: 60,
                         fontSize: 17,
-                        onPressed: () {
-                          final finished = appState.completeCurrentSet();
+                        onPressed: () async {
+                          final finished = await appState.completeCurrentSet();
                           onChanged();
+
+                          if (!context.mounted) return;
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               backgroundColor: AppColors.card,
                               content: Text(
                                 finished
-                                    ? 'Тренировка сохранена в историю'
+                                    ? 'Тренировка сохранена. Следующий вес: ${formatWeight(recommendedWeight)}кг'
                                     : 'Подход завершён',
                               ),
                             ),
@@ -136,6 +140,20 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                if (appState.workoutFinished) ...[
+                  const SizedBox(height: 13),
+                  DarkActionButton(
+                    text:
+                        'Начать новую тренировку с ${formatWeight(recommendedWeight)}кг',
+                    height: 60,
+                    fontSize: 16,
+                    onPressed: () async {
+                      await appState.startNextWorkoutWithRecommendedWeight();
+                      onChanged();
+                    },
+                  ),
+                ],
 
                 const SizedBox(height: 13),
 
@@ -185,7 +203,7 @@ class HomeScreen extends StatelessWidget {
                     );
 
                     if (result != null) {
-                      appState.addExercise(result);
+                      await appState.addExercise(result);
                       onChanged();
                     }
                   },
@@ -198,39 +216,23 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  WorkoutLog? _lastLogForCurrentExercise() {
-    for (final log in appState.logs) {
-      if (log.exercise.name == appState.selectedExercise.name) {
-        return log;
-      }
-    }
-
-    return null;
-  }
-
-  String _formatWeight(double value) {
-    if (value % 1 == 0) {
-      return value.toInt().toString();
-    }
-
-    return value.toStringAsFixed(1);
-  }
 }
 
 class _RecommendationCard extends StatelessWidget {
   const _RecommendationCard({
     required this.lastText,
     required this.recommendationText,
+    required this.completedText,
   });
 
   final String lastText;
   final String recommendationText;
+  final String completedText;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 15),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.95),
         borderRadius: BorderRadius.circular(18),
@@ -243,7 +245,7 @@ class _RecommendationCard extends StatelessWidget {
           const Icon(
             Icons.trending_up,
             color: AppColors.accent,
-            size: 29,
+            size: 31,
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -251,14 +253,14 @@ class _RecommendationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Рекомендация',
+                  'Умная рекомендация',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 17,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Text(
                   'В прошлый раз: $lastText',
                   style: const TextStyle(
@@ -272,8 +274,17 @@ class _RecommendationCard extends StatelessWidget {
                   recommendationText,
                   style: const TextStyle(
                     color: AppColors.accent,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  completedText,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

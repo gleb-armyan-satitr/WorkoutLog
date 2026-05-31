@@ -71,20 +71,31 @@ class TopWideLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 57,
+      height: 58,
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.accent,
         borderRadius: BorderRadius.circular(15),
       ),
-      child: const Center(
-        child: Text(
-          'W',
-          style: TextStyle(
+      child: Center(
+        child: Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
             color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            height: 1,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: const Center(
+            child: Text(
+              'W',
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                height: 1,
+                letterSpacing: -1,
+              ),
+            ),
           ),
         ),
       ),
